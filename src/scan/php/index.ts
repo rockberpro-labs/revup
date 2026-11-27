@@ -34,7 +34,7 @@ function fallback(text: string, file: string, message: string, line: number): Ra
     snippet: message.slice(0, 240),
     confidence: "heuristic",
     resolved: false,
-    note: "fallback por regex; fatos deste arquivo são heurísticos",
+    note: "regex fallback; facts from this file are heuristic",
   };
   return [err, ...extractRegex(text, file)].sort((a, b) => a.line - b.line);
 }
@@ -47,7 +47,7 @@ async function isFile(p: string): Promise<boolean> {
   }
 }
 
-/** Ordem: dir do includer, includePaths, sourceRoot (absolutos também tentam sob sourceRoot). */
+/** Order: includer dir, includePaths, sourceRoot (absolute paths are also tried under sourceRoot). */
 function candidates(target: string, includerAbs: string, ctx: ScanContext): string[] {
   const t = target.replaceAll("{__DIR__}", dirname(includerAbs));
   if (isAbsolute(t)) return [resolve(t), resolve(join(ctx.sourceRoot, t))];
@@ -65,7 +65,7 @@ export const phpScanner: Scanner = {
     const toRel = (abs: string) => relative(sourceRoot, abs).split(sep).join("/");
     const inside = (abs: string) => !toRel(abs).startsWith("..");
     const entryAbs = resolve(sourceRoot, entry);
-    if (!(await isFile(entryAbs))) throw new RevupError(`entry não encontrado: ${entry} (sourceRoot: ${sourceRoot})`);
+    if (!(await isFile(entryAbs))) throw new RevupError(`entry not found: ${entry} (sourceRoot: ${sourceRoot})`);
 
     const files: ScanResult["files"] = [];
     const facts: RawFact[] = [];
@@ -84,7 +84,7 @@ export const phpScanner: Scanner = {
       for (const f of own) {
         if (f.kind !== "include") continue;
         if (!f.resolved) {
-          f.note = "include dinâmico";
+          f.note = "dynamic include";
           continue;
         }
         let found: string | undefined;
@@ -96,13 +96,13 @@ export const phpScanner: Scanner = {
         }
         if (!found) {
           f.resolved = false;
-          f.note = "arquivo não encontrado";
+          f.note = "file not found";
         } else if (!inside(found)) {
           f.resolved = false;
-          f.note = "fora do sourceRoot";
+          f.note = "outside sourceRoot";
         } else {
           f.target = toRel(found);
-          if (stack.includes(found)) f.note = "ciclo";
+          if (stack.includes(found)) f.note = "cycle";
           else if (!done.has(found) && !children.includes(found)) children.push(found);
         }
       }

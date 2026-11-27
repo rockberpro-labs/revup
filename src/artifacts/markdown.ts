@@ -1,4 +1,4 @@
-/** Parsing de markdown com headings fixos: `## ` abre seção; bullets são a unidade de conteúdo. */
+/** Markdown parsing with fixed headings: `## ` opens a section; bullets are the unit of content. */
 export interface Section {
   heading: string;
   lines: string[];
@@ -22,7 +22,7 @@ export function parseSections(md: string): Section[] {
 export interface Bullet {
   text: string;
   cites: string[];
-  /** "Nenhum/Nenhuma ..." — dispensa citação */
+  /** "None ..." — exempt from citation */
   none: boolean;
 }
 
@@ -37,12 +37,12 @@ export function parseBullets(lines: string[]): Bullet[] {
   const out: Bullet[] = [];
   for (const l of lines) {
     const m = BULLET.exec(l);
-    if (m) out.push({ text: m[1]!, cites: extractCitations(m[1]!), none: /^nenhum[ao]?\b/i.test(m[1]!) });
+    if (m) out.push({ text: m[1]!, cites: extractCitations(m[1]!), none: /^none\b/i.test(m[1]!) });
   }
   return out;
 }
 
-/** Linhas não vazias que não são bullet (prosa solta). */
+/** Non-empty lines that are not bullets (loose prose). */
 export function proseLines(lines: string[]): string[] {
   return lines.filter((l) => l.trim() && !BULLET.test(l) && !/^<!--.*-->$/.test(l.trim()));
 }

@@ -1,4 +1,4 @@
-/** Análise de SQL neutra de linguagem. Variáveis já vêm como `{$x}` / `{expr}`. */
+/** Language-neutral SQL analysis. Variables already arrive as `{$x}` / `{expr}`. */
 export interface SqlInfo {
   operation: "SELECT" | "INSERT" | "REPLACE" | "UPDATE" | "DELETE";
   tables: string[];
@@ -16,7 +16,7 @@ const TOKEN = String.raw`\{[^}]*\}|[\`"\w.$]+`;
 const KEYWORDS = /^(select|where|set|values|dual|from|join|on|using)$/i;
 const FROM_STOP = String.raw`(?=\bWHERE\b|\bGROUP\b|\bORDER\b|\bHAVING\b|\bLIMIT\b|\bUNION\b|\bJOIN\b|\bON\b|\bSET\b|\bVALUES\b|\bUSING\b|;|\)|$)`;
 
-/** "Select an option from the list": lista de colunas com ≥2 palavras soltas e sem sinais de SQL. */
+/** "Select an option from the list": a column list with ≥2 bare words and no SQL markers. */
 function looksLikeProse(text: string): boolean {
   const list = /^\s*\(?\s*SELECT\b([\s\S]*?)\bFROM\b/i.exec(text)?.[1] ?? "";
   if (/[,*(.{`'"]/.test(list) || /\bas\b/i.test(list)) return false;

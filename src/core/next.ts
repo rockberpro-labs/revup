@@ -15,9 +15,9 @@ import type { Target } from "./target.ts";
 export interface StepResult {
   ok: boolean;
   errors: string[];
-  /** só 04-audit */
+  /** 04-audit only */
   verdict?: "READY" | "BLOCKED";
-  /** só 01-scan: hashes dos fontes lidos */
+  /** 01-scan only: hashes of the source files read */
   sourceHashes?: Record<string, string>;
 }
 export type Handler = (t: Target) => Promise<StepResult> | StepResult;
@@ -40,25 +40,25 @@ function prerequisiteErrors(t: Target, step: Current): string[] {
   return missingPrerequisites(step, (f) => existsSync(join(t.dir, f)));
 }
 
-/** Roda a etapa corrente; só avança se ela passar. */
+/** Runs the current step; only advances if it passes. */
 export async function advance(t: Target, handlers: Handlers): Promise<Outcome> {
   let { state, stale } = await currentState(t);
   let prefix = "";
   if (stale.length) {
-    prefix = `fonte alterado (${stale.join(", ")}): reiniciando a partir de 01-scan\n`;
+    prefix = `source changed (${stale.join(", ")}): restarting from 01-scan\n`;
     state = initialState();
   }
   if (state.step === "DONE") {
-    return { advanced: false, message: "[DONE] nada a fazer", errors: [], state };
+    return { advanced: false, message: "[DONE] nothing to do", errors: [], state };
   }
   const step = state.step;
   const missing = prerequisiteErrors(t, step);
   if (missing.length) {
-    return { advanced: false, message: `${prefix}[${step}] bloqueado`, errors: missing, state };
+    return { advanced: false, message: `${prefix}[${step}] blocked`, errors: missing, state };
   }
   const res = await handlers[step](t);
   if (!res.ok) {
-    return { advanced: false, message: `${prefix}[${step}] falhou`, errors: res.errors, state };
+    return { advanced: false, message: `${prefix}[${step}] failed`, errors: res.errors, state };
   }
   if (step === "04-audit" && res.verdict === "BLOCKED") {
     return { advanced: false, message: prefix + blockedMessage(), errors: res.errors, state };
@@ -70,19 +70,18 @@ export async function advance(t: Target, handlers: Handlers): Promise<Outcome> {
   return { advanced: true, message: prefix + completionMessage(step, state.step), errors: [], state };
 }
 
-/** Valida a etapa corrente sem avançar nem gravar estado. */
-/** `validators` sobrescrevem handlers só na checagem (sem efeitos colaterais, ex.: sem reescanear). */
+/** Validates the current step without advancing or writing state. `validators` override handlers only for the check (no side effects, e.g. no rescan). */
 export async function check(t: Target, handlers: Handlers, validators: Partial<Handlers> = {}): Promise<Outcome> {
   const { state, stale } = await currentState(t);
   if (state.step === "DONE") return { advanced: false, message: "[DONE]", errors: [], state };
   const errors = [
-    ...stale.map((f) => `fonte alterado: ${f}`),
+    ...stale.map((f) => `source changed: ${f}`),
     ...prerequisiteErrors(t, state.step),
   ];
   if (!errors.length) errors.push(...(await (validators[state.step] ?? handlers[state.step])(t)).errors);
   return {
     advanced: false,
-    message: errors.length ? `[${state.step}] inválido` : `[${state.step}] ok`,
+    message: errors.length ? `[${state.step}] invalid` : `[${state.step}] ok`,
     errors,
     state,
   };

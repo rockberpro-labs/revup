@@ -7,11 +7,11 @@ import type { StepResult } from "../core/next.ts";
 import type { Target } from "../core/target.ts";
 import { describeFact, needsReview, type Fact } from "../scan/facts.ts";
 
-/** Fatos que a spec precisa cobrir. call/function_def/include resolvido são contexto, não exigem citação. */
+/** Facts the spec must cover. call/function_def/resolved include are context and need no citation. */
 const COVERED_KINDS = new Set(["sql", "input", "session", "redirect"]);
 export const requiredFacts = (facts: Fact[]): Fact[] => facts.filter((f) => COVERED_KINDS.has(f.kind) || needsReview(f));
 
-const PENDING = "<PENDENTE>";
+const PENDING = "<PENDING>";
 
 async function read(t: Target, name: string): Promise<string> {
   try {
@@ -21,14 +21,14 @@ async function read(t: Target, name: string): Promise<string> {
   }
 }
 
-/** `Proposta padrão:` já preenchidas no audit.md anterior, por Q-xx. */
+/** `Default proposal:` entries already filled in the previous audit.md, by Q-xx. */
 export function parseProposals(md: string): Map<string, string> {
   const out = new Map<string, string>();
   let q: string | undefined;
   for (const line of md.split(/\r?\n/)) {
     const h = /^###\s+(Q-\d+)\b/.exec(line);
     if (h) q = h[1];
-    const p = /^\s*[-*]\s+Proposta padrão:\s*(.*?)\s*$/i.exec(line);
+    const p = /^\s*[-*]\s+Default proposal:\s*(.*?)\s*$/i.exec(line);
     if (p && q) out.set(q, p[1]!);
   }
   return out;
@@ -56,27 +56,27 @@ export async function computeAudit(t: Target): Promise<Audit | { errors: string[
   });
 
   const errors = [
-    ...uncovered.map((f) => `fato ${f.id} não coberto na spec: ${describeFact(f)}`),
-    ...missing.map((q) => `${q.id} sem "Proposta padrão" em audit.md`),
+    ...uncovered.map((f) => `fact ${f.id} not covered in the spec: ${describeFact(f)}`),
+    ...missing.map((q) => `${q.id} has no "Default proposal" in audit.md`),
   ];
   const verdict = errors.length ? "BLOCKED" : "READY";
 
   const md = [
-    `# Auditoria — ${t.id}`,
+    `# Audit — ${t.id}`,
     "",
-    "## Cobertura",
-    `- Fatos exigidos: ${required.length}`,
-    `- Cobertos: ${required.length - uncovered.length}`,
-    `- Não cobertos: ${uncovered.length}`,
+    "## Coverage",
+    `- Required facts: ${required.length}`,
+    `- Covered: ${required.length - uncovered.length}`,
+    `- Not covered: ${uncovered.length}`,
     ...uncovered.map((f) => `  - [${f.id}] ${describeFact(f)}`),
     "",
-    "## Perguntas",
-    ...(questions.length ? [] : ["- Nenhuma."]),
+    "## Questions",
+    ...(questions.length ? [] : ["- None."]),
     ...questions.flatMap((q) => [
       `### ${q.id} ${q.title}`,
-      `- Evidência: ${q.evidencia.map((e) => `[${e}]`).join(" ")}`,
-      `- Ambiguidade: ${q.ambiguidade}`,
-      `- Proposta padrão: ${proposals.get(q.id) || PENDING}`,
+      `- Evidence: ${q.evidence.map((e) => `[${e}]`).join(" ")}`,
+      `- Ambiguity: ${q.ambiguity}`,
+      `- Default proposal: ${proposals.get(q.id) || PENDING}`,
       "",
     ]),
     "## Status",
@@ -86,7 +86,7 @@ export async function computeAudit(t: Target): Promise<Audit | { errors: string[
   return { md, verdict, errors };
 }
 
-/** 04-audit (run): gera audit.md deterministicamente; preserva propostas já escritas pelo agente. */
+/** 04-audit (run): generates audit.md deterministically; preserves proposals the agent already wrote. */
 export async function auditHandler(t: Target): Promise<StepResult> {
   const a = await computeAudit(t);
   if (!("md" in a)) return { ok: false, errors: a.errors };
@@ -94,7 +94,7 @@ export async function auditHandler(t: Target): Promise<StepResult> {
   return { ok: true, errors: a.errors, verdict: a.verdict };
 }
 
-/** 04-audit (validate): mesma conta, sem escrever. */
+/** 04-audit (validate): same computation, without writing. */
 export async function auditValidator(t: Target): Promise<StepResult> {
   const a = await computeAudit(t);
   if (!("md" in a)) return { ok: false, errors: a.errors };

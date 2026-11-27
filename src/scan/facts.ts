@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 
-/** Kinds neutros: o detalhe da linguagem fica em `source`/`name`. */
+/** Neutral kinds: language-specific detail lives in `source`/`name`. */
 export const FACT_KINDS = ["include", "sql", "input", "session", "call", "redirect", "function_def", "parse_error"] as const;
 export type FactKind = (typeof FACT_KINDS)[number];
 
@@ -32,12 +32,12 @@ export const FactsFileSchema = z.object({
   entry: z.string(),
   files: z.array(z.object({ path: z.string(), sha256: z.string() })),
   facts: z.array(FactSchema),
-  /** ids dos fatos que precisam de pergunta (needsReview): atalho para o 02-extract */
+  /** ids of facts that need a question (needsReview): shortcut for 02-extract */
   unresolved: z.array(z.string()),
 });
 export type FactsFile = z.infer<typeof FactsFileSchema>;
 
-/** Lacuna real que exige uma pergunta em open-questions.md (≠ apenas ter parte dinâmica). */
+/** A real gap that requires a question in open-questions.md (not merely having a dynamic part). */
 export function needsReview(f: Pick<RawFact, "kind" | "resolved" | "tables">): boolean {
   switch (f.kind) {
     case "include":
@@ -54,7 +54,7 @@ export function needsReview(f: Pick<RawFact, "kind" | "resolved" | "tables">): b
   }
 }
 
-/** Descrição curta e legível de um fato (mensagens de erro e audit.md). */
+/** Short, readable description of a fact (error messages and audit.md). */
 export function describeFact(f: Fact): string {
   const where = `${f.file}:${f.line}`;
   switch (f.kind) {
@@ -77,8 +77,8 @@ export function normalizeSnippet(s: string, max = 240): string {
 }
 
 /**
- * IDs estáveis: sha1(kind|arquivo|snippet|ocorrência). Sem número de linha,
- * então editar código acima não renumera as citações.
+ * Stable IDs: sha1(kind|file|snippet|occurrence). No line number,
+ * so editing code above does not renumber citations.
  */
 export function assignIds(raw: RawFact[]): Fact[] {
   const seen = new Map<string, number>();

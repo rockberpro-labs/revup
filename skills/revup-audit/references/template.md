@@ -1,20 +1,20 @@
 # Template — 04-audit (audit.md)
 
-A CLI gera o arquivo; você só preenche as linhas `Proposta padrão`.
+The CLI generates the file; you only fill in the `Default proposal` lines.
 
 ```markdown
-# Auditoria — <domain/module/program>
+# Audit — <domain/module/program>
 
-## Cobertura
-- Fatos exigidos: 12
-- Cobertos: 12
-- Não cobertos: 0
+## Coverage
+- Required facts: 12
+- Covered: 12
+- Not covered: 0
 
-## Perguntas
-### Q-01 Include dinâmico de módulo
-- Evidência: [F-eeeeeeee]
-- Ambiguidade: `$modulo` define qual arquivo é incluído.
-- Proposta padrão: Tratar como lista fixa {a, b}; confirmar com o dono do módulo.
+## Questions
+### Q-01 Dynamic module include
+- Evidence: [F-eeeeeeee]
+- Ambiguity: `$modulo` selects which file is included.
+- Default proposal: Treat as a fixed list {a, b}; confirm with the module owner.
 
 ## Status
 READY

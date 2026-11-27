@@ -5,7 +5,7 @@ import { ARTIFACTS, STEPS, type Step } from "../state/machine.ts";
 import { loadFacts } from "./facts-io.ts";
 import type { Target } from "./target.ts";
 
-/** Raiz do plugin (src/core → ../..). */
+/** Plugin root (src/core → ../..). */
 export const PLUGIN_ROOT = resolve(import.meta.dir, "../..");
 
 const SKILL_DIR: Partial<Record<Step, string>> = {
@@ -16,14 +16,14 @@ const SKILL_DIR: Partial<Record<Step, string>> = {
 
 export function parseStep(s: string): Step {
   const step = STEPS.find((x) => x === s);
-  if (!step) throw new RevupError(`etapa inválida: "${s}" (use ${STEPS.join(", ")})`);
+  if (!step) throw new RevupError(`invalid step: "${s}" (use ${STEPS.join(", ")})`);
   return step;
 }
 
-/** Instrução da etapa = corpo do SKILL.md + template + caminhos absolutos do alvo (fonte única). */
+/** Step instructions = SKILL.md body + template + the target's absolute paths (single source). */
 export async function buildPrompt(t: Target, step: Step): Promise<string> {
   const skill = SKILL_DIR[step];
-  if (!skill) throw new RevupError(`${step} é determinística (sem agente): rode \`revup next ${t.id}\``);
+  if (!skill) throw new RevupError(`${step} is deterministic (no agent): run \`revup next ${t.id}\``);
   const dir = join(PLUGIN_ROOT, "skills", skill);
   const body = (await readFile(join(dir, "SKILL.md"), "utf8")).replace(/^---[\s\S]*?---\s*/, "");
   const template = await readFile(join(dir, "references", "template.md"), "utf8");
@@ -38,13 +38,13 @@ export async function buildPrompt(t: Target, step: Step): Promise<string> {
   return [
     `# Etapa ${step} — ${t.id}`,
     "",
-    "## Arquivos a ler",
+    "## Files to read",
     ...reads,
     "",
-    "## Arquivos a escrever",
+    "## Files to write",
     ...writes,
     "",
-    `Ao terminar: \`revup next ${t.id}\` (tool \`revup_next\`) e repita a linha final que ele imprimir.`,
+    `When done: run \`revup next ${t.id}\` (tool \`revup_next\`) and repeat the final line it prints.`,
     "",
     body.trim(),
     "",

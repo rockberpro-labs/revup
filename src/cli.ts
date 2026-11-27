@@ -2,13 +2,13 @@
 import { RevupError } from "./errors.ts";
 import { cmdInit, cmdNext, cmdPrompt, cmdStatus, cmdValidate, type CmdResult } from "./core/commands.ts";
 
-const USAGE = `uso: revup [--project <dir>] <comando>
+const USAGE = `usage: revup [--project <dir>] <command>
 
-  init                     cria revup.config.json e revup.manifest.json de exemplo
+  init                     create sample revup.config.json and revup.manifest.json
   status [domain/module/program]
-  next <domain/module/program>      executa/valida a etapa corrente e avança
-  validate <domain/module/program>  valida a etapa corrente sem avançar
-  prompt <etapa> <domain/module/program>  instrução da etapa 02-extract|03-spec|04-audit`;
+  next <domain/module/program>      run/validate the current step and advance
+  validate <domain/module/program>  validate the current step without advancing
+  prompt <step> <domain/module/program>  instructions for step 02-extract|03-spec|04-audit`;
 
 export async function run(argv: string[]): Promise<CmdResult> {
   let project = process.cwd();
@@ -16,7 +16,7 @@ export async function run(argv: string[]): Promise<CmdResult> {
   const pi = args.indexOf("--project");
   if (pi >= 0) {
     project = args[pi + 1] ?? "";
-    if (!project) throw new RevupError("--project exige um diretório");
+    if (!project) throw new RevupError("--project requires a directory");
     args.splice(pi, 2);
   }
   const [cmd, arg] = args;
@@ -33,7 +33,7 @@ export async function run(argv: string[]): Promise<CmdResult> {
       return cmdValidate(project, arg);
     case "prompt": {
       const id = args[2];
-      if (!arg || !id) throw new RevupError("prompt exige <etapa> <domain/module/program>");
+      if (!arg || !id) throw new RevupError("prompt requires <step> <domain/module/program>");
       return cmdPrompt(project, arg, id);
     }
     default:
@@ -48,7 +48,7 @@ if (import.meta.main) {
     process.exit(r.ok ? 0 : 1);
   } catch (e) {
     if (e instanceof RevupError) {
-      console.error(`erro: ${e.message}`);
+      console.error(`error: ${e.message}`);
       process.exit(2);
     }
     throw e;

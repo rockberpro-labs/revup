@@ -9,7 +9,7 @@ function classify(name: string): "input" | "session" | null {
   return INPUT.has(name) ? "input" : null;
 }
 
-/** Fatos de um AST do php-parser, em ordem de aparição no arquivo. */
+/** Facts from a php-parser AST, in order of appearance in the file. */
 export function extractAst(ast: any, text: string, file: string): RawFact[] {
   const out: { offset: number; seq: number; fact: RawFact }[] = [];
   const writes = new WeakSet<object>();

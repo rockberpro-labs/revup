@@ -5,15 +5,15 @@ import { RevupError } from "../errors.ts";
 export interface Target {
   project: Project;
   id: string;
-  /** caminho do entry relativo ao sourceRoot */
+  /** entry path relative to sourceRoot */
   entry: string;
-  /** diretório de saída do alvo (absoluto) */
+  /** target output directory (absolute) */
   dir: string;
 }
 
 export function resolveTarget(project: Project, id: string): Target {
-  if (!TARGET_ID.test(id)) throw new RevupError(`alvo inválido: "${id}" (esperado domain/module/program)`);
+  if (!TARGET_ID.test(id)) throw new RevupError(`invalid target: "${id}" (expected domain/module/program)`);
   const program = project.manifest.programs.find((p) => p.id === id);
-  if (!program) throw new RevupError(`alvo "${id}" não está em revup.manifest.json`);
+  if (!program) throw new RevupError(`target "${id}" is not in revup.manifest.json`);
   return { project, id, entry: program.entry, dir: join(project.outDir, ...id.split("/")) };
 }

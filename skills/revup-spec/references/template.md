@@ -3,27 +3,27 @@
 ```markdown
 # Spec — <domain/module/program>
 
-## Objetivo
-Cadastra itens de um pedido e redireciona para a lista.
+## Goal
+Registers the items of an order and redirects to the list.
 
-## Entradas
-- GET `id`: identifica o pedido [F-aaaaaaaa]
-- POST `qtd`: quantidade do item [F-bbbbbbbb]
+## Inputs
+- GET `id`: identifies the order [F-aaaaaaaa]
+- POST `qtd`: item quantity [F-bbbbbbbb]
 
-## Efeitos no banco
-- SELECT pedidos/clientes por id [F-cccccccc]
-- INSERT em itens (pedido, qtd) [F-dddddddd]
+## Database effects
+- SELECT orders/customers by id [F-cccccccc]
+- INSERT into items (order, qty) [F-dddddddd]
 
-## Efeitos em sessão
-- Grava `ultimo_pedido` [F-eeeeeeee]
-- Lê `user` [F-ffffffff]
+## Session effects
+- Writes `ultimo_pedido` [F-eeeeeeee]
+- Reads `user` [F-ffffffff]
 
-## Regras
-- Item é inserido sem validar a quantidade [F-dddddddd, F-bbbbbbbb]
+## Rules
+- The item is inserted without validating the quantity [F-dddddddd, F-bbbbbbbb]
 
-## Saídas/Redirecionamentos
-- Redireciona para `lista.php?ok={id}` [F-99999999]
+## Outputs/Redirects
+- Redirects to `lista.php?ok={id}` [F-99999999]
 
-## Pendências
-- Q-01: include dinâmico de módulo
+## Open items
+- Q-01: dynamic module include
 ```

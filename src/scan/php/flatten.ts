@@ -1,7 +1,7 @@
-/** Achata expressões de string PHP em texto, com `{$x}` / `{expr}` no lugar do que é dinâmico. */
+/** Flattens PHP string expressions into text, using `{$x}` / `{expr}` for anything dynamic. */
 export interface Flat {
   text: string;
-  /** true se há partes dinâmicas (exceto {__DIR__}, que é resolvível) */
+  /** true if there are dynamic parts (except {__DIR__}, which is resolvable) */
   dynamic: boolean;
 }
 

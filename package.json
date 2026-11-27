@@ -1,7 +1,7 @@
 {
   "name": "revup",
   "version": "0.1.0",
-  "description": "Escava código PHP legado e gera specs organizadas para reescrita.",
+  "description": "Digs facts out of legacy PHP code and generates organized specs to kick-start a rewrite.",
   "type": "module",
   "license": "MIT",
   "bin": {

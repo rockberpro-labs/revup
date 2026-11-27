@@ -9,7 +9,7 @@ const StepEnum = z.enum(STEPS);
 export const StateSchema = z.object({
   step: z.union([StepEnum, z.literal("DONE")]),
   completed: z.array(StepEnum),
-  /** caminho relativo a sourceRoot -> sha256 */
+  /** path relative to sourceRoot -> sha256 */
   sourceHashes: z.record(z.string(), z.string()),
   updatedAt: z.string(),
 });
@@ -38,7 +38,7 @@ export async function saveState(targetDir: string, state: State): Promise<void> 
   await writeFile(join(targetDir, "state.json"), JSON.stringify(next, null, 2) + "\n");
 }
 
-/** Arquivos-fonte cujo hash mudou (ou que sumiram) desde o scan. */
+/** Source files whose hash changed (or that disappeared) since the scan. */
 export async function staleFiles(sourceRoot: string, hashes: Record<string, string>): Promise<string[]> {
   const stale: string[] = [];
   for (const [rel, hash] of Object.entries(hashes)) {

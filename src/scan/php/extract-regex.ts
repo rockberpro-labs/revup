@@ -1,7 +1,7 @@
 import { normalizeSnippet, type RawFact } from "../facts.ts";
 import { analyzeSql } from "../sql.ts";
 
-/** Fallback heurístico (por linha) para arquivos que o parser não aceita. */
+/** Heuristic (per-line) fallback for files the parser rejects. */
 export function extractRegex(text: string, file: string): RawFact[] {
   const facts: RawFact[] = [];
   const lines = text.split(/\r\n|\r|\n/);

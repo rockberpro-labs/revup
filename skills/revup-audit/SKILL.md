@@ -1,18 +1,18 @@
 ---
 name: revup-audit
-description: Etapa 04-audit do revup. A CLI calcula a cobertura de fatos e gera audit.md; o agente só escreve uma proposta padrão para cada pergunta em aberto.
+description: revup step 04-audit. The CLI computes fact coverage and generates audit.md; the agent only writes a default proposal for each open question.
 ---
 
 # revup · 04-audit
 
-A cobertura e o veredito (`READY`/`BLOCKED`) são calculados pela CLI, não por você.
+Coverage and the verdict (`READY`/`BLOCKED`) are computed by the CLI, not by you.
 
-1. Chame `revup_next` (`projectDir`, `target`). Ele gera `audit.md` e imprime `READY` ou `BLOCKED` com a lista exata do que falta.
-2. Para cada `Q-xx` sem proposta, edite `audit.md` e troque `<PENDENTE>` por **uma** proposta padrão objetiva (uma linha, a opção mais provável dado o código), no formato de `references/template.md`. O usuário só precisa aprovar ou ajustar.
-3. Para cada "fato não coberto", volte ao `spec.md`, cite o ID no bullet correto e rode de novo.
-4. Chame `revup_next` até `[04-audit concluído] -> Status: READY`.
+1. Call `revup_next` (`projectDir`, `target`). It generates `audit.md` and prints `READY` or `BLOCKED` with the exact list of what is missing.
+2. For each `Q-xx` without a proposal, edit `audit.md` and replace `<PENDING>` with **one** objective default proposal (one line, the most likely option given the code), in the format of `references/template.md`. The user only has to approve or adjust it.
+3. For each "not covered" fact, go back to `spec.md`, cite the ID in the right bullet, and run again.
+4. Call `revup_next` until you get `[04-audit done] -> Status: READY`.
 
-## Regras
+## Rules
 
-- Não altere `Cobertura`, `Status` nem as linhas `Evidência`/`Ambiguidade`; a CLI as regera.
-- Propostas ≤ 240 caracteres, sem perguntar de volta: sempre proponha um padrão.
+- Do not change `Coverage`, `Status`, or the `Evidence`/`Ambiguity` lines; the CLI regenerates them.
+- Proposals are at most 240 characters and never ask back: always propose a default.

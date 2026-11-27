@@ -1,23 +1,23 @@
 ---
 name: revup-spec
-description: Etapa 03-spec do revup. Escreve spec.md a partir de facts.json, observations.md e open-questions.md, num template rígido onde cada regra cita evidências.
+description: revup step 03-spec. Writes spec.md from facts.json, observations.md and open-questions.md, using a rigid template where every rule cites evidence.
 ---
 
 # revup · 03-spec
 
-1. Chame a tool `revup_prompt` (`projectDir`, `step` = `03-spec`, `target`) para obter os caminhos absolutos.
-2. Leia `facts.json`, `observations.md` e `open-questions.md`.
-3. Escreva `spec.md` exatamente no formato de `references/template.md`.
+1. Call the `revup_prompt` tool (`projectDir`, `step` = `03-spec`, `target`) to get the absolute paths.
+2. Read `facts.json`, `observations.md` and `open-questions.md`.
+3. Write `spec.md` exactly in the format of `references/template.md`.
 
-## Regras
+## Rules
 
-- Use só as 7 seções do template, na ordem dada. Seção sem conteúdo: `- Nenhum.`
-- Cada bullet ≤ 240 caracteres e cita `[F-xxxxxxxx]` existente. O arquivo todo tem no máximo 200 linhas.
-- `Objetivo`: 1 a 3 linhas, sem citação.
-- Cubra **todos** os fatos de kind `sql`, `input`, `session` e `redirect`: cada ID precisa ser citado em algum bullet (vários IDs por bullet são aceitos).
-- `Pendências` lista cada pergunta como `Q-xx` (apenas as que existem em `open-questions.md`).
-- Sem opinião nem sugestões de arquitetura nova: especifique o comportamento observado.
+- Use only the 7 template sections, in the given order. Empty section: `- None.`
+- Each bullet is at most 240 characters and cites an existing `[F-xxxxxxxx]`. The whole file is at most 200 lines.
+- `Goal`: 1 to 3 lines, no citation.
+- Cover **every** fact of kind `sql`, `input`, `session` and `redirect`: each ID must be cited in some bullet (several IDs per bullet are accepted).
+- `Open items` lists each question as `Q-xx` (only ones that exist in `open-questions.md`).
+- No opinions and no new-architecture suggestions: specify the observed behavior.
 
-## Fim
+## Finish
 
-Chame `revup_next` (`projectDir`, `target`). Se listar erros, corrija e rode de novo. Anuncie o resultado.
+Call `revup_next` (`projectDir`, `target`). If it lists errors, fix them and run it again. Report the result.

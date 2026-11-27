@@ -3,25 +3,25 @@
 ## observations.md
 
 ```markdown
-# Observações — <domain/module/program>
+# Observations — <domain/module/program>
 
-## Regras observadas
-- Só aceita pedido existente; senão redireciona para a lista [F-aaaaaaaa]
-- Quantidade vem de POST e é gravada em itens sem validação [F-bbbbbbbb, F-cccccccc]
+## Observed rules
+- Only accepts an existing order; otherwise redirects to the list [F-aaaaaaaa]
+- Quantity comes from POST and is stored in items without validation [F-bbbbbbbb, F-cccccccc]
 
-## Fluxo
-- 1. Lê id de GET e consulta pedidos/clientes [F-aaaaaaaa]
-- 2. Insere item e grava último pedido na sessão [F-bbbbbbbb, F-dddddddd]
+## Flow
+- 1. Reads id from GET and queries orders/customers [F-aaaaaaaa]
+- 2. Inserts the item and stores the last order in the session [F-bbbbbbbb, F-dddddddd]
 ```
 
 ## open-questions.md
 
 ```markdown
-# Perguntas em aberto — <domain/module/program>
+# Open questions — <domain/module/program>
 
-## Q-01 Include dinâmico de módulo
-- Evidência: [F-eeeeeeee]
-- Ambiguidade: `$modulo` define qual arquivo é incluído; valores possíveis desconhecidos.
+## Q-01 Dynamic module include
+- Evidence: [F-eeeeeeee]
+- Ambiguity: `$modulo` selects which file is included; possible values are unknown.
 ```
 
-Sem perguntas: mantenha só o título e escreva `Nenhuma.` abaixo dele (apenas se `unresolved` estiver vazio).
+No questions: keep only the title and write `None.` below it (only if `unresolved` is empty).

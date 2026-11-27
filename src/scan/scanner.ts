@@ -16,7 +16,7 @@ export interface ScanResult {
 
 export interface Scanner {
   language: string;
-  /** entry é relativo ao sourceRoot */
+  /** entry is relative to sourceRoot */
   scan(entry: string, ctx: ScanContext): Promise<ScanResult>;
 }
 
@@ -24,6 +24,6 @@ const scanners: Record<string, Scanner> = { php: phpScanner };
 
 export function getScanner(language: string): Scanner {
   const s = scanners[language];
-  if (!s) throw new RevupError(`linguagem "${language}" não suportada; disponíveis: ${Object.keys(scanners).join(", ")}`);
+  if (!s) throw new RevupError(`language "${language}" is not supported; available: ${Object.keys(scanners).join(", ")}`);
   return s;
 }

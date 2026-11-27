@@ -1,9 +1,9 @@
-/** Máquina de estados pura (sem IO). */
+/** Pure state machine (no IO). */
 export const STEPS = ["01-scan", "02-extract", "03-spec", "04-audit"] as const;
 export type Step = (typeof STEPS)[number];
 export type Current = Step | "DONE";
 
-/** Artefatos que cada etapa produz, relativos ao diretório do alvo. */
+/** Artifacts each step produces, relative to the target directory. */
 export const ARTIFACTS: Record<Step, string[]> = {
   "01-scan": ["facts.json"],
   "02-extract": ["observations.md", "open-questions.md"],
@@ -16,18 +16,18 @@ export function nextStep(step: Step): Current {
   return STEPS[i + 1] ?? "DONE";
 }
 
-/** Artefatos exigidos antes de rodar `current` que ainda não existem. */
+/** Artifacts required before running `current` that do not exist yet. */
 export function missingPrerequisites(current: Current, exists: (file: string) => boolean): string[] {
   const upTo = current === "DONE" ? STEPS.length : STEPS.indexOf(current);
   return STEPS.slice(0, upTo)
     .flatMap((s) => ARTIFACTS[s].map((f) => ({ s, f })))
     .filter(({ f }) => !exists(f))
-    .map(({ s, f }) => `${f} ausente (produzido por ${s})`);
+    .map(({ s, f }) => `${f} is missing (produced by ${s})`);
 }
 
 export function completionMessage(done: Step, next: Current): string {
-  if (done === "04-audit") return `[04-audit concluído] -> Status: READY`;
-  return `[${done} concluído] -> Próximo passo: ${next}`;
+  if (done === "04-audit") return `[04-audit done] -> Status: READY`;
+  return `[${done} done] -> Next step: ${next}`;
 }
 
 export function blockedMessage(): string {

@@ -1,22 +1,22 @@
 ---
 name: revup-extract
-description: Etapa 02-extract do revup. Lê facts.json e o código PHP e escreve observations.md e open-questions.md com regras observadas e apenas ambiguidades reais.
+description: revup step 02-extract. Reads facts.json and the PHP code, then writes observations.md and open-questions.md with observed rules and only real ambiguities.
 ---
 
 # revup · 02-extract
 
-1. Chame a tool `revup_prompt` (`projectDir`, `step` = `02-extract`, `target`) para obter os caminhos absolutos.
-2. Leia `facts.json` e os arquivos-fonte listados (campo `files`).
-3. Escreva `observations.md` e `open-questions.md` exatamente no formato de `references/template.md`.
+1. Call the `revup_prompt` tool (`projectDir`, `step` = `02-extract`, `target`) to get the absolute paths.
+2. Read `facts.json` and the source files it lists (`files` field).
+3. Write `observations.md` and `open-questions.md` exactly in the format of `references/template.md`.
 
-## Regras
+## Rules
 
-- Cada bullet tem no máximo 240 caracteres e cita ao menos um `[F-xxxxxxxx]` que exista em `facts.json`.
-- Descreva o que o código **faz** (condições, validações, cálculos, efeitos), não o que deveria fazer.
-- Todo ID listado em `unresolved` no `facts.json` precisa aparecer como `Evidência` de uma pergunta `Q-xx`.
-- Só registre ambiguidade real: um valor interpolado em SQL (`WHERE id=$id`) não é ambiguidade; include dinâmico, tabela dinâmica e erro de parse são.
-- Sem prosa fora de bullets. Seção sem conteúdo: `- Nenhuma.`
+- Each bullet is at most 240 characters and cites at least one `[F-xxxxxxxx]` that exists in `facts.json`.
+- Describe what the code **does** (conditions, validations, calculations, effects), not what it should do.
+- Every ID listed in `unresolved` in `facts.json` must appear as the `Evidence` of a `Q-xx` question.
+- Record only real ambiguity: a value interpolated into SQL (`WHERE id=$id`) is not ambiguity; a dynamic include, a dynamic table name, and a parse error are.
+- No prose outside bullets. Empty section: `- None.`
 
-## Fim
+## Finish
 
-Chame `revup_next` (`projectDir`, `target`). Se listar erros, corrija e rode de novo. Anuncie o resultado.
+Call `revup_next` (`projectDir`, `target`). If it lists errors, fix them and run it again. Report the result.

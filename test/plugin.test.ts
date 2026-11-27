@@ -11,26 +11,26 @@ import { createServer } from "../src/mcp.ts";
 const ROOT = resolve(import.meta.dir, "..");
 const json = async (p: string) => JSON.parse(await readFile(join(ROOT, p), "utf8"));
 
-describe("conformidade Agent Plugins 1.0.0", () => {
+describe("Agent Plugins 1.0.0 conformance", () => {
   const ajv = new Ajv2020({ strict: false });
 
-  test("plugin.json valida contra o schema oficial", async () => {
+  test("plugin.json validates against the official schema", async () => {
     const validate = ajv.compile(await json("test/schemas/plugin.schema.json"));
     const manifest = await json("plugin.json");
     expect(validate(manifest), JSON.stringify(validate.errors)).toBe(true);
     expect(manifest.name).toMatch(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/);
   });
 
-  test("mcp.json valida e usa comando/args conforme a spec", async () => {
+  test("mcp.json validates and uses command/args per the spec", async () => {
     const validate = ajv.compile(await json("test/schemas/mcp.schema.json"));
     const mcp = await json("mcp.json");
     expect(validate(mcp), JSON.stringify(validate.errors)).toBe(true);
     const s = mcp.mcpServers.revup;
-    expect(s.command).not.toContain("${"); // command nunca é expandido
+    expect(s.command).not.toContain("${"); // command is never expanded
     expect(s.args[0]).toStartWith("${PLUGIN_ROOT}/");
   });
 
-  test("cada skill tem SKILL.md com name = diretório e description", async () => {
+  test("each skill has SKILL.md with name = directory and a description", async () => {
     const dirs = (await readdir(join(ROOT, "skills"), { withFileTypes: true })).filter((d) => d.isDirectory());
     expect(dirs.map((d) => d.name).sort()).toEqual(["revup", "revup-audit", "revup-extract", "revup-spec"]);
     for (const d of dirs) {
@@ -63,22 +63,22 @@ async function exercise(client: Client) {
   expect(text(status)).toContain("vendas/pedidos/cad");
 
   const next = await client.callTool({ name: "revup_next", arguments: { projectDir: dir, target: "vendas/pedidos/cad" } });
-  expect(text(next)).toBe("[01-scan concluído] -> Próximo passo: 02-extract");
+  expect(text(next)).toBe("[01-scan done] -> Next step: 02-extract");
 
   const prompt = await client.callTool({ name: "revup_prompt", arguments: { projectDir: dir, step: "02-extract", target: "vendas/pedidos/cad" } });
   expect(text(prompt)).toContain("## Template");
 
   const bad = await client.callTool({ name: "revup_next", arguments: { projectDir: dir, target: "a/b/c" } });
   expect(bad.isError).toBe(true);
-  expect(text(bad)).toContain("não está em revup.manifest.json");
+  expect(text(bad)).toContain("is not in revup.manifest.json");
 
   const fail = await client.callTool({ name: "revup_validate", arguments: { projectDir: dir, target: "vendas/pedidos/cad" } });
   expect(fail.isError).toBe(true);
-  expect(text(fail)).toContain("observations.md ausente");
+  expect(text(fail)).toContain("observations.md is missing");
 }
 
-describe("servidor MCP", () => {
-  test("em memória", async () => {
+describe("MCP server", () => {
+  test("in memory", async () => {
     const [a, b] = InMemoryTransport.createLinkedPair();
     const server = createServer();
     await server.connect(a);
@@ -88,7 +88,7 @@ describe("servidor MCP", () => {
     await client.close();
   });
 
-  test("processo real via comando e args do mcp.json (stdio)", async () => {
+  test("real process via the command and args from mcp.json (stdio)", async () => {
     const s = (await json("mcp.json")).mcpServers.revup;
     const transport = new StdioClientTransport({
       command: s.command,

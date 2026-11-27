@@ -17,7 +17,7 @@ export type Config = z.infer<typeof ConfigSchema>;
 export const ManifestSchema = z.object({
   programs: z.array(
     z.object({
-      id: z.string().regex(TARGET_ID, "id deve ser domain/module/program"),
+      id: z.string().regex(TARGET_ID, "id must be domain/module/program"),
       entry: z.string().min(1),
     }),
   ),
@@ -28,9 +28,9 @@ export interface Project {
   dir: string;
   config: Config;
   manifest: Manifest;
-  /** sourceRoot absoluto */
+  /** absolute sourceRoot */
   sourceRoot: string;
-  /** outDir absoluto */
+  /** absolute outDir */
   outDir: string;
 }
 
@@ -42,18 +42,18 @@ async function readJson<T>(file: string, schema: z.ZodType<T>): Promise<T> {
   try {
     raw = await readFile(file, "utf8");
   } catch {
-    throw new RevupError(`arquivo não encontrado: ${file} (rode \`revup init\`)`);
+    throw new RevupError(`file not found: ${file} (run \`revup init\`)`);
   }
   let json: unknown;
   try {
     json = JSON.parse(raw);
   } catch (e) {
-    throw new RevupError(`JSON inválido em ${file}: ${(e as Error).message}`);
+    throw new RevupError(`invalid JSON in ${file}: ${(e as Error).message}`);
   }
   const parsed = schema.safeParse(json);
   if (!parsed.success) {
-    const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "(raiz)"}: ${i.message}`);
-    throw new RevupError(`${file} inválido:\n  ${issues.join("\n  ")}`);
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`);
+    throw new RevupError(`${file} is invalid:\n  ${issues.join("\n  ")}`);
   }
   return parsed.data;
 }
@@ -64,7 +64,7 @@ export async function loadProject(projectDir: string): Promise<Project> {
   const manifest = await readJson(join(dir, MANIFEST_FILE), ManifestSchema);
   const ids = new Set<string>();
   for (const p of manifest.programs) {
-    if (ids.has(p.id)) throw new RevupError(`${MANIFEST_FILE}: id duplicado: ${p.id}`);
+    if (ids.has(p.id)) throw new RevupError(`${MANIFEST_FILE}: duplicate id: ${p.id}`);
     ids.add(p.id);
   }
   return {

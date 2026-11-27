@@ -8,7 +8,7 @@ export interface Source {
   encoding: "utf8" | "latin1";
 }
 
-/** Lê o arquivo; no modo auto tenta UTF-8 estrito e cai para windows-1252. */
+/** Reads the file; in auto mode tries strict UTF-8 and falls back to windows-1252. */
 export async function readSource(abs: string, encoding: Config["encoding"]): Promise<Source> {
   const buf = await readFile(abs);
   const hash = sha256(buf);

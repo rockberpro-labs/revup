@@ -9,7 +9,7 @@ import { validateExtract, validateSpec } from "../artifacts/validate.ts";
 import type { Handler, Handlers, StepResult } from "./next.ts";
 import type { Target } from "./target.ts";
 
-/** 01-scan: 100% código, sem LLM. Escreve facts.json de forma determinística. */
+/** 01-scan: pure code, no LLM. Writes facts.json deterministically. */
 export const scanHandler: Handler = async (t: Target): Promise<StepResult> => {
   const { config, sourceRoot } = t.project;
   try {
@@ -41,7 +41,7 @@ export const validateScan: Handler = async (t) => {
   return { ok: errors.length === 0, errors };
 };
 
-/** Registro padrão. 02/03 são artefatos do agente: "rodar" = validar. */
+/** Default registry. 02/03 are agent-written artifacts: "run" = validate. */
 export const defaultHandlers: Handlers = {
   "01-scan": scanHandler,
   "02-extract": validateExtract,

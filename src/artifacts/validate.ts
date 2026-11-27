@@ -32,19 +32,19 @@ function zodErrors(label: string, section: string, err: { issues: { path: Proper
   });
 }
 
-/** Confere o conjunto exato de seções (rigidez do template). */
+/** Checks the exact set of sections (template rigidity). */
 function checkSections(label: string, sections: Section[], expected: string[]): string[] {
   const errors: string[] = [];
   const names = sections.map((s) => s.heading);
-  for (const e of expected) if (!names.includes(e)) errors.push(`${label}: seção "## ${e}" ausente`);
-  for (const n of names) if (!expected.includes(n)) errors.push(`${label}: seção "## ${n}" não faz parte do template`);
+  for (const e of expected) if (!names.includes(e)) errors.push(`${label}: section "## ${e}" is missing`);
+  for (const n of names) if (!expected.includes(n)) errors.push(`${label}: section "## ${n}" is not part of the template`);
   return errors;
 }
 
 function validateSection(label: string, s: Section, schema: ZodType, value: unknown, allowProse = false): string[] {
   const errors: string[] = [];
   const prose = allowProse ? [] : proseLines(s.lines);
-  if (prose.length) errors.push(`${label}: ## ${s.heading}: prosa fora de bullet ("${prose[0]!.trim().slice(0, 50)}")`);
+  if (prose.length) errors.push(`${label}: ## ${s.heading}: prose outside a bullet ("${prose[0]!.trim().slice(0, 50)}")`);
   const r = schema.safeParse(value);
   if (!r.success) errors.push(...zodErrors(label, s.heading, r.error));
   return errors;
@@ -56,7 +56,7 @@ export function parseQuestions(md: string): { questions: Question[]; errors: str
   for (const s of parseSections(md)) {
     const m = /^(Q-\d+)\s+(.+)$/.exec(s.heading);
     if (!m) {
-      errors.push(`open-questions.md: seção "## ${s.heading}" deve ser "## Q-01 Título"`);
+      errors.push(`open-questions.md: section "## ${s.heading}" must be "## Q-01 Title"`);
       continue;
     }
     const line = (label: string) =>
@@ -64,14 +64,14 @@ export function parseQuestions(md: string): { questions: Question[]; errors: str
     const q = QuestionSchema.safeParse({
       id: m[1],
       title: m[2],
-      evidencia: extractCitations(line("Evidência")),
-      ambiguidade: line("Ambiguidade").trim(),
+      evidence: extractCitations(line("Evidence")),
+      ambiguity: line("Ambiguity").trim(),
     });
     if (q.success) questions.push(q.data);
     else errors.push(...zodErrors("open-questions.md", s.heading, q.error));
   }
   const ids = questions.map((q) => q.id);
-  for (const id of new Set(ids.filter((x, i) => ids.indexOf(x) !== i))) errors.push(`open-questions.md: id duplicado ${id}`);
+  for (const id of new Set(ids.filter((x, i) => ids.indexOf(x) !== i))) errors.push(`open-questions.md: duplicate id ${id}`);
   return { questions, errors };
 }
 
@@ -88,7 +88,7 @@ export async function validateExtract(t: Target): Promise<StepResult> {
   const errors: string[] = [];
 
   const obs = await readArtifact(t, "observations.md");
-  if (obs === undefined) errors.push(`observations.md ausente (rode \`revup prompt 02-extract ${t.id}\`)`);
+  if (obs === undefined) errors.push(`observations.md is missing (run \`revup prompt 02-extract ${t.id}\`)`);
   else {
     const sections = parseSections(obs);
     errors.push(...checkSections("observations.md", sections, OBSERVATIONS_SECTIONS));
@@ -99,13 +99,13 @@ export async function validateExtract(t: Target): Promise<StepResult> {
   }
 
   const qmd = await readArtifact(t, "open-questions.md");
-  if (qmd === undefined) errors.push(`open-questions.md ausente (rode \`revup prompt 02-extract ${t.id}\`)`);
+  if (qmd === undefined) errors.push(`open-questions.md is missing (run \`revup prompt 02-extract ${t.id}\`)`);
   else {
     const { errors: qe } = parseQuestions(qmd);
     errors.push(...qe, ...unknownCitations(qmd, known, "open-questions.md"));
     const cited = new Set(extractCitations(qmd));
     for (const id of facts.unresolved) {
-      if (!cited.has(id)) errors.push(`open-questions.md: fato ${id} (unresolved) sem pergunta`);
+      if (!cited.has(id)) errors.push(`open-questions.md: fact ${id} (unresolved) has no question`);
     }
   }
   return { ok: errors.length === 0, errors };
@@ -117,10 +117,10 @@ export async function validateSpec(t: Target): Promise<StepResult> {
   if (!facts) return { ok: false, errors: fe };
   const known = new Set(facts.facts.map((f) => f.id));
   const spec = await readArtifact(t, "spec.md");
-  if (spec === undefined) return { ok: false, errors: [`spec.md ausente (rode \`revup prompt 03-spec ${t.id}\`)`] };
+  if (spec === undefined) return { ok: false, errors: [`spec.md is missing (run \`revup prompt 03-spec ${t.id}\`)`] };
 
   const errors: string[] = [];
-  if (spec.split(/\r?\n/).length > MAX_SPEC_LINES) errors.push(`spec.md: acima de ${MAX_SPEC_LINES} linhas`);
+  if (spec.split(/\r?\n/).length > MAX_SPEC_LINES) errors.push(`spec.md: over ${MAX_SPEC_LINES} lines`);
   const sections = parseSections(spec);
   errors.push(...checkSections("spec.md", sections, SPEC_SECTIONS));
 
@@ -129,14 +129,14 @@ export async function validateSpec(t: Target): Promise<StepResult> {
 
   for (const s of sections.filter((x) => SPEC_SECTIONS.includes(x.heading))) {
     const shape = SpecSchema.shape as Record<string, ZodType>;
-    if (s.heading === "Objetivo") {
-      errors.push(...validateSection("spec.md", s, shape.Objetivo!, s.lines.map((l) => l.trim()).filter(Boolean), true));
-    } else if (s.heading === "Pendências") {
+    if (s.heading === "Goal") {
+      errors.push(...validateSection("spec.md", s, shape.Goal!, s.lines.map((l) => l.trim()).filter(Boolean), true));
+    } else if (s.heading === "Open items") {
       const items = parseBullets(s.lines).map((b) => ({ text: b.text, none: b.none, qrefs: b.text.match(/\bQ-\d{2,}\b/g) ?? [] }));
-      errors.push(...validateSection("spec.md", s, shape.Pendências!, items));
+      errors.push(...validateSection("spec.md", s, shape["Open items"]!, items));
       for (const it of items) {
-        if (!it.none && !it.qrefs.length) errors.push(`spec.md: ## Pendências: item sem referência Q-xx ("${it.text.slice(0, 40)}")`);
-        for (const q of it.qrefs) if (!qids.has(q)) errors.push(`spec.md: ## Pendências: ${q} não existe em open-questions.md`);
+        if (!it.none && !it.qrefs.length) errors.push(`spec.md: ## Open items: item without a Q-xx reference ("${it.text.slice(0, 40)}")`);
+        for (const q of it.qrefs) if (!qids.has(q)) errors.push(`spec.md: ## Open items: ${q} does not exist in open-questions.md`);
       }
     } else {
       errors.push(...validateSection("spec.md", s, shape[s.heading]!, parseBullets(s.lines)));

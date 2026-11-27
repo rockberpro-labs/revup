@@ -7,7 +7,7 @@ import { advance, check, statusRows, type Handlers, type Outcome } from "./next.
 import { buildPrompt, parseStep } from "./prompt.ts";
 import { resolveTarget } from "./target.ts";
 
-/** Resultado textual compartilhado por CLI e MCP. */
+/** Textual result shared by the CLI and MCP. */
 export interface CmdResult {
   ok: boolean;
   text: string;
@@ -25,7 +25,7 @@ export async function cmdInit(projectDir: string): Promise<CmdResult> {
   const created: string[] = [];
   const files: Record<string, unknown> = {
     [CONFIG_FILE]: { language: "php", sourceRoot: "../erp", outDir: "./revup-out", includePaths: [], encoding: "auto" },
-    [MANIFEST_FILE]: { programs: [{ id: "dominio/modulo/programa", entry: "caminho/arquivo.php" }] },
+    [MANIFEST_FILE]: { programs: [{ id: "domain/module/program", entry: "path/to/file.php" }] },
   };
   for (const [name, body] of Object.entries(files)) {
     const path = join(dir, name);
@@ -33,7 +33,7 @@ export async function cmdInit(projectDir: string): Promise<CmdResult> {
     await writeFile(path, JSON.stringify(body, null, 2) + "\n");
     created.push(name);
   }
-  return { ok: true, text: created.length ? `criado: ${created.join(", ")}` : "nada a criar (arquivos já existem)" };
+  return { ok: true, text: created.length ? `created: ${created.join(", ")}` : "nothing to create (files already exist)" };
 }
 
 export async function cmdStatus(projectDir: string, id?: string): Promise<CmdResult> {
@@ -41,7 +41,7 @@ export async function cmdStatus(projectDir: string, id?: string): Promise<CmdRes
   const resolveId = (x: string) => resolveTarget(project, x);
   if (id) resolveId(id); // valida
   const rows = (await statusRows(project, resolveId)).filter((r) => !id || r.id === id);
-  if (!rows.length) return { ok: true, text: "nenhum programa no manifest" };
+  if (!rows.length) return { ok: true, text: "no programs in the manifest" };
   const text = rows
     .map((r) => `${r.id.padEnd(40)} ${r.step}${r.stale.length ? `  STALE (${r.stale.join(", ")})` : ""}`)
     .join("\n");
