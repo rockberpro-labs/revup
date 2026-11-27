@@ -1,0 +1,3 @@
+<?php
+$r = mysql_query("SELECT * FROM clientes WHERE nome = 'José'");
+$_SESSION['msg'] = "Atenção";

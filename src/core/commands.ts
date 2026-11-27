@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { CONFIG_FILE, MANIFEST_FILE, loadProject } from "../config.ts";
-import { defaultHandlers } from "./handlers.ts";
+import { defaultHandlers, defaultValidators } from "./handlers.ts";
 import { advance, check, statusRows, type Handlers, type Outcome } from "./next.ts";
 import { resolveTarget } from "./target.ts";
 
@@ -54,5 +54,5 @@ export async function cmdNext(projectDir: string, id: string, handlers: Handlers
 
 export async function cmdValidate(projectDir: string, id: string, handlers: Handlers = defaultHandlers): Promise<CmdResult> {
   const project = await loadProject(projectDir);
-  return render(await check(resolveTarget(project, id), handlers));
+  return render(await check(resolveTarget(project, id), handlers, defaultValidators));
 }

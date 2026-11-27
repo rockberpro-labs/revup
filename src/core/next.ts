@@ -71,14 +71,15 @@ export async function advance(t: Target, handlers: Handlers): Promise<Outcome> {
 }
 
 /** Valida a etapa corrente sem avançar nem gravar estado. */
-export async function check(t: Target, handlers: Handlers): Promise<Outcome> {
+/** `validators` sobrescrevem handlers só na checagem (sem efeitos colaterais, ex.: sem reescanear). */
+export async function check(t: Target, handlers: Handlers, validators: Partial<Handlers> = {}): Promise<Outcome> {
   const { state, stale } = await currentState(t);
   if (state.step === "DONE") return { advanced: false, message: "[DONE]", errors: [], state };
   const errors = [
     ...stale.map((f) => `fonte alterado: ${f}`),
     ...prerequisiteErrors(t, state.step),
   ];
-  if (!errors.length) errors.push(...(await handlers[state.step](t)).errors);
+  if (!errors.length) errors.push(...(await (validators[state.step] ?? handlers[state.step])(t)).errors);
   return {
     advanced: false,
     message: errors.length ? `[${state.step}] inválido` : `[${state.step}] ok`,

@@ -104,6 +104,8 @@ describe("alvos e comandos", () => {
     const { dir } = await makeProject();
     expect((await cmdInit(dir)).text).toContain("nada a criar");
     expect((await cmdStatus(dir)).text).toContain("vendas/pedidos/cad");
+    const first = await cmdNext(dir, "vendas/pedidos/cad");
+    expect(first).toEqual({ ok: true, text: "[01-scan concluído] -> Próximo passo: 02-extract" });
     const r = await cmdNext(dir, "vendas/pedidos/cad");
     expect(r.ok).toBe(false);
     expect(r.text).toContain("ainda não implementada");
