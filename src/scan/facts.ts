@@ -32,10 +32,44 @@ export const FactsFileSchema = z.object({
   entry: z.string(),
   files: z.array(z.object({ path: z.string(), sha256: z.string() })),
   facts: z.array(FactSchema),
-  /** ids dos fatos com resolved=false (atalho para o 02-extract) */
+  /** ids dos fatos que precisam de pergunta (needsReview): atalho para o 02-extract */
   unresolved: z.array(z.string()),
 });
 export type FactsFile = z.infer<typeof FactsFileSchema>;
+
+/** Lacuna real que exige uma pergunta em open-questions.md (≠ apenas ter parte dinâmica). */
+export function needsReview(f: Pick<RawFact, "kind" | "resolved" | "tables">): boolean {
+  switch (f.kind) {
+    case "include":
+    case "input":
+    case "session":
+    case "call":
+      return !f.resolved;
+    case "parse_error":
+      return true;
+    case "sql":
+      return !f.tables?.length || f.tables.some((t) => t.startsWith("{"));
+    default:
+      return false;
+  }
+}
+
+/** Descrição curta e legível de um fato (mensagens de erro e audit.md). */
+export function describeFact(f: Fact): string {
+  const where = `${f.file}:${f.line}`;
+  switch (f.kind) {
+    case "input":
+    case "session":
+      return `${f.source}${f.key !== undefined ? `[${f.key}]` : ""} ${f.mode} (${where})`;
+    case "sql":
+      return `${f.operation} ${(f.tables ?? []).join(",")} (${where})`;
+    case "redirect":
+    case "include":
+      return `${f.kind} ${f.target} (${where})`;
+    default:
+      return `${f.kind} ${f.name ?? f.snippet} (${where})`;
+  }
+}
 
 export function normalizeSnippet(s: string, max = 240): string {
   const n = s.replace(/\s+/g, " ").trim();

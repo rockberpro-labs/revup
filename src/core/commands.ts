@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { CONFIG_FILE, MANIFEST_FILE, loadProject } from "../config.ts";
 import { defaultHandlers, defaultValidators } from "./handlers.ts";
 import { advance, check, statusRows, type Handlers, type Outcome } from "./next.ts";
+import { buildPrompt, parseStep } from "./prompt.ts";
 import { resolveTarget } from "./target.ts";
 
 /** Resultado textual compartilhado por CLI e MCP. */
@@ -55,4 +56,9 @@ export async function cmdNext(projectDir: string, id: string, handlers: Handlers
 export async function cmdValidate(projectDir: string, id: string, handlers: Handlers = defaultHandlers): Promise<CmdResult> {
   const project = await loadProject(projectDir);
   return render(await check(resolveTarget(project, id), handlers, defaultValidators));
+}
+
+export async function cmdPrompt(projectDir: string, step: string, id: string): Promise<CmdResult> {
+  const project = await loadProject(projectDir);
+  return { ok: true, text: await buildPrompt(resolveTarget(project, id), parseStep(step)) };
 }

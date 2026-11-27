@@ -108,7 +108,7 @@ describe("alvos e comandos", () => {
     expect(first).toEqual({ ok: true, text: "[01-scan concluído] -> Próximo passo: 02-extract" });
     const r = await cmdNext(dir, "vendas/pedidos/cad");
     expect(r.ok).toBe(false);
-    expect(r.text).toContain("ainda não implementada");
+    expect(r.text).toContain("observations.md ausente");
   });
 
   test("manifest com id inválido é rejeitado", async () => {

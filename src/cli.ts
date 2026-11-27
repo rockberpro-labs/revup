@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 import { RevupError } from "./errors.ts";
-import { cmdInit, cmdNext, cmdStatus, cmdValidate, type CmdResult } from "./core/commands.ts";
+import { cmdInit, cmdNext, cmdPrompt, cmdStatus, cmdValidate, type CmdResult } from "./core/commands.ts";
 
 const USAGE = `uso: revup [--project <dir>] <comando>
 
   init                     cria revup.config.json e revup.manifest.json de exemplo
   status [domain/module/program]
   next <domain/module/program>      executa/valida a etapa corrente e avança
-  validate <domain/module/program>  valida a etapa corrente sem avançar`;
+  validate <domain/module/program>  valida a etapa corrente sem avançar
+  prompt <etapa> <domain/module/program>  instrução da etapa 02-extract|03-spec|04-audit`;
 
 export async function run(argv: string[]): Promise<CmdResult> {
   let project = process.cwd();
@@ -30,6 +31,11 @@ export async function run(argv: string[]): Promise<CmdResult> {
     case "validate":
       if (!arg) throw new RevupError("validate exige <domain/module/program>");
       return cmdValidate(project, arg);
+    case "prompt": {
+      const id = args[2];
+      if (!arg || !id) throw new RevupError("prompt exige <etapa> <domain/module/program>");
+      return cmdPrompt(project, arg, id);
+    }
     default:
       return { ok: false, text: USAGE };
   }

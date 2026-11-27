@@ -3,7 +3,7 @@ import { cp, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { cmdNext, cmdValidate } from "../src/core/commands.ts";
-import { FactsFileSchema, assignIds, type Fact } from "../src/scan/facts.ts";
+import { FactsFileSchema, assignIds, needsReview, type Fact } from "../src/scan/facts.ts";
 import { phpScanner } from "../src/scan/php/index.ts";
 import { analyzeSql } from "../src/scan/sql.ts";
 import { getScanner } from "../src/scan/scanner.ts";
@@ -150,7 +150,11 @@ describe("01-scan via revup next", () => {
     const facts = FactsFileSchema.parse(JSON.parse(await readFile(join(dir, "out/vendas/pedidos/cad/facts.json"), "utf8")));
     expect(facts.language).toBe("php");
     expect(facts.unresolved.length).toBeGreaterThan(0);
-    expect(facts.facts.filter((f) => !f.resolved).map((f) => f.id).sort()).toEqual([...facts.unresolved].sort());
+    expect(facts.facts.filter(needsReview).map((f) => f.id).sort()).toEqual([...facts.unresolved].sort());
+    // SQL só com valor interpolado não é lacuna; include dinâmico e tabela dinâmica são
+    const byId = new Map(facts.facts.map((f) => [f.id, f]));
+    const kinds = facts.unresolved.map((id) => `${byId.get(id)!.kind}:${byId.get(id)!.line}`).sort();
+    expect(kinds).toEqual(["include:7", "sql:15"]);
     expect((await cmdValidate(dir, "vendas/pedidos/cad")).text).toContain("[02-extract]");
   });
 
