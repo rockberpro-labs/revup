@@ -5,7 +5,7 @@ description: Etapa 02-extract do revup. Lê facts.json e o código PHP e escreve
 
 # revup · 02-extract
 
-1. Chame `revup_prompt 02-extract <alvo>` para obter os caminhos absolutos.
+1. Chame a tool `revup_prompt` (`projectDir`, `step` = `02-extract`, `target`) para obter os caminhos absolutos.
 2. Leia `facts.json` e os arquivos-fonte listados (campo `files`).
 3. Escreva `observations.md` e `open-questions.md` exatamente no formato de `references/template.md`.
 
@@ -19,4 +19,4 @@ description: Etapa 02-extract do revup. Lê facts.json e o código PHP e escreve
 
 ## Fim
 
-Rode `revup_next <alvo>`. Se listar erros, corrija e rode de novo. Anuncie o resultado.
+Chame `revup_next` (`projectDir`, `target`). Se listar erros, corrija e rode de novo. Anuncie o resultado.

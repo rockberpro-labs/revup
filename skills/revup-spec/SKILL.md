@@ -5,7 +5,7 @@ description: Etapa 03-spec do revup. Escreve spec.md a partir de facts.json, obs
 
 # revup · 03-spec
 
-1. Chame `revup_prompt 03-spec <alvo>` para obter os caminhos absolutos.
+1. Chame a tool `revup_prompt` (`projectDir`, `step` = `03-spec`, `target`) para obter os caminhos absolutos.
 2. Leia `facts.json`, `observations.md` e `open-questions.md`.
 3. Escreva `spec.md` exatamente no formato de `references/template.md`.
 
@@ -20,4 +20,4 @@ description: Etapa 03-spec do revup. Escreve spec.md a partir de facts.json, obs
 
 ## Fim
 
-Rode `revup_next <alvo>`. Se listar erros, corrija e rode de novo. Anuncie o resultado.
+Chame `revup_next` (`projectDir`, `target`). Se listar erros, corrija e rode de novo. Anuncie o resultado.
