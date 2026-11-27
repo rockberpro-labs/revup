@@ -8,9 +8,9 @@ description: Orchestrates revup, which turns legacy PHP code into organized spec
 Each program (`domain/module/program`) goes through 4 steps, always in this order:
 `01-scan` → `02-extract` → `03-spec` → `04-audit` → `DONE`.
 
-Tools: MCP tools `revup_status`, `revup_next`, `revup_prompt`, `revup_validate`
+Tools: MCP tools `revup_discover`, `revup_status`, `revup_next`, `revup_prompt`, `revup_validate`
 (all take `projectDir`, the folder containing `revup.config.json`, plus `target` where applicable).
-Without MCP, the CLI is equivalent (`revup --project <dir> status|next|prompt|validate`), but it is only on the PATH if the plugin repo was linked with `bun link`.
+Without MCP, the CLI is equivalent (`revup --project <dir> discover|status|next|prompt|validate`), but it is only on the PATH if the plugin repo was linked with `bun link`.
 
 ## Steps
 
@@ -19,6 +19,13 @@ Without MCP, the CLI is equivalent (`revup --project <dir> status|next|prompt|va
 3. For `02-extract`, `03-spec` and `04-audit`, call `revup_prompt` (`projectDir`, `step`, `target`) and follow the instructions it returns. They contain the absolute paths and the template.
 4. **Always** finish with `revup_next`. If it lists errors, fix exactly what it lists and run it again. Never advance manually.
 5. Repeat the CLI's final line to the user, for example `[02-extract done] -> Next step: 03-spec`.
+
+## Whole module
+
+1. Call `revup_discover` (`projectDir`, `module` as `domain/module`, `dir` relative to `sourceRoot`). It previews the entry points it found, meaning files no other file includes. Show the user the proposal and let them correct it.
+2. After the user agrees, call it again with `write: true` to add the programs to the manifest.
+3. `revup_status` and `revup_next` accept `domain/module`. `revup_next` on a module only runs `01-scan` for each program and lists the programs waiting on an agent step.
+4. Steps 02-04 still go one program at a time, using the Steps section above.
 
 ## Rules
 

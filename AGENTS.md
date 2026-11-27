@@ -13,7 +13,7 @@ Design contract: `BUILD_PLAN.md`. User-facing docs: `README.md`.
 ## Commands
 
 - `bun install` · `bun test` · `bun run typecheck` (both must be green before any commit)
-- CLI: `bun src/cli.ts --project <dir> status|next|prompt|validate|init`
+- CLI: `bun src/cli.ts --project <dir> status|next|prompt|validate|init|discover`
 - MCP server: `bun src/mcp.ts` (stdio)
 - There is no `php` binary on the dev machine: never shell out to PHP; parsing is `php-parser` (pure JS).
 
@@ -21,7 +21,8 @@ Design contract: `BUILD_PLAN.md`. User-facing docs: `README.md`.
 
 - `src/core/commands.ts`: the single command layer; `cli.ts` and `mcp.ts` are thin adapters over it.
 - `src/state/`: pure state machine (`machine.ts`) and `state.json` IO + stale detection (`store.ts`).
-- `src/core/next.ts`: `advance` (run + advance) and `check` (validate only, no side effects). `handlers.ts` is the step registry.
+- `src/core/discover.ts`: proposes manifest entries (files nobody includes) for a directory; read-only, `cmdDiscover` writes only with `--write`.
+- `src/core/next.ts`: `advance` (run + advance), `advanceScans` (module-level `next`: only 01-scan) and `check` (validate only, no side effects). `handlers.ts` is the step registry.
 - `src/scan/`: `scanner.ts` (language registry), `facts.ts` (schema, stable IDs, `needsReview`), `sql.ts` (language-neutral). `php/` is the only language-specific code.
 - `src/artifacts/`, `src/audit/`: markdown parsing, Zod schemas, validators, coverage and `audit.md` generation.
 - `skills/*/SKILL.md` + `references/template.md`: instructions and templates. `revup prompt` serves these same files (single source).
