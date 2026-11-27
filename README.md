@@ -7,6 +7,18 @@ Motor determinístico (Bun/TS) + skills curtas + servidor MCP, empacotado como
 [Agent Plugin](https://agent-plugins.org/) (spec 1.0.0): funciona em qualquer cliente compatível.
 Requer `bun` no PATH. Plano de construção: `BUILD_PLAN.md`.
 
+## Instalação local (máquina do dev)
+
+```sh
+git clone <repo> && cd revup
+bun install        # dependências locais; não há build nem bundle
+bun link           # opcional: coloca `revup` no PATH (CLI)
+```
+
+Para o agente, aponte o cliente para esta pasta como plugin (`plugin.json` + `mcp.json`);
+o servidor MCP sobe com `bun ${PLUGIN_ROOT}/src/mcp.ts`. Tudo roda local: o scan lê o
+legado direto do disco e nada é enviado para fora (só o agente que você usar lê os artefatos).
+
 ## Fluxo por programa
 
 | Etapa | Quem | Artefato |
