@@ -1,10 +1,11 @@
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { CONFIG_FILE, MANIFEST_FILE, loadProject } from "../config.ts";
+import { CONFIG_FILE, MANIFEST_FILE, loadProject, type Manifest } from "../config.ts";
 import { defaultHandlers, defaultValidators } from "./handlers.ts";
 import { advance, check, statusRows, type Handlers, type Outcome } from "./next.ts";
 import { buildPrompt, parseStep } from "./prompt.ts";
+import { discover, renderDiscovery } from "./discover.ts";
 import { resolveTarget } from "./target.ts";
 
 /** Textual result shared by the CLI and MCP. */
@@ -25,7 +26,7 @@ export async function cmdInit(projectDir: string): Promise<CmdResult> {
   const created: string[] = [];
   const files: Record<string, unknown> = {
     [CONFIG_FILE]: { language: "php", sourceRoot: "../erp", outDir: "./revup-out", includePaths: [], encoding: "auto" },
-    [MANIFEST_FILE]: { programs: [{ id: "domain/module/program", entry: "path/to/file.php" }] },
+    [MANIFEST_FILE]: { programs: [PLACEHOLDER] },
   };
   for (const [name, body] of Object.entries(files)) {
     const path = join(dir, name);
@@ -61,4 +62,18 @@ export async function cmdValidate(projectDir: string, id: string, handlers: Hand
 export async function cmdPrompt(projectDir: string, step: string, id: string): Promise<CmdResult> {
   const project = await loadProject(projectDir);
   return { ok: true, text: await buildPrompt(resolveTarget(project, id), parseStep(step)) };
+}
+
+const PLACEHOLDER = { id: "domain/module/program", entry: "path/to/file.php" };
+
+/** Previews the entry points found under `dir`; with `write`, appends them to the manifest. */
+export async function cmdDiscover(projectDir: string, module: string, dir: string, write = false): Promise<CmdResult> {
+  const project = await loadProject(projectDir);
+  const d = await discover(project, module, dir);
+  if (write && d.proposals.length) {
+    const kept = project.manifest.programs.filter((p) => !(p.id === PLACEHOLDER.id && p.entry === PLACEHOLDER.entry));
+    const manifest: Manifest = { programs: [...kept, ...d.proposals.map((p) => ({ id: p.id, entry: p.entry }))] };
+    await writeFile(join(project.dir, MANIFEST_FILE), JSON.stringify(manifest, null, 2) + "\n");
+  }
+  return { ok: true, text: renderDiscovery(d, write) };
 }

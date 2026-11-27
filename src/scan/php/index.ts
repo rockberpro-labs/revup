@@ -60,6 +60,7 @@ function candidates(target: string, includerAbs: string, ctx: ScanContext): stri
 
 export const phpScanner: Scanner = {
   language: "php",
+  extensions: [".php"],
   async scan(entry: string, ctx: ScanContext): Promise<ScanResult> {
     const sourceRoot = resolve(ctx.sourceRoot);
     const toRel = (abs: string) => relative(sourceRoot, abs).split(sep).join("/");

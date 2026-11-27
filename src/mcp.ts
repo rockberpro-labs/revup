@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { cmdNext, cmdPrompt, cmdStatus, cmdValidate, type CmdResult } from "./core/commands.ts";
+import { cmdDiscover, cmdNext, cmdPrompt, cmdStatus, cmdValidate, type CmdResult } from "./core/commands.ts";
 import { RevupError } from "./errors.ts";
 
 const projectDir = z.string().describe("Revup project folder (where revup.config.json lives)");
@@ -22,6 +22,20 @@ async function respond(fn: () => Promise<CmdResult>) {
 export function createServer(): McpServer {
   const server = new McpServer({ name: "revup", version: "0.1.0" });
 
+  server.registerTool(
+    "revup_discover",
+    {
+      description:
+        "Finds the entry points (files no other file includes) under a source directory and proposes manifest entries for a module. Preview by default; write=true appends them to revup.manifest.json.",
+      inputSchema: {
+        projectDir,
+        module: z.string().describe("Module as domain/module"),
+        dir: z.string().describe("Directory to search, relative to sourceRoot"),
+        write: z.boolean().optional().describe("Append the proposed entries to the manifest"),
+      },
+    },
+    ({ projectDir, module, dir, write }) => respond(() => cmdDiscover(projectDir, module, dir, write ?? false)),
+  );
   server.registerTool(
     "revup_status",
     { description: "Lists targets and their current step (STALE if the PHP changed since the scan).", inputSchema: { projectDir, target: target.optional() } },
