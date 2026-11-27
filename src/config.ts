@@ -5,6 +5,8 @@ import { RevupError } from "./errors.ts";
 
 export const TARGET_ID = /^[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/;
 
+export const MODULE_ID = /^[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/;
+
 export const ConfigSchema = z.object({
   language: z.string().default("php"),
   sourceRoot: z.string().min(1),

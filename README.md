@@ -35,8 +35,9 @@ Output goes to `<outDir>/<domain>/<module>/<program>/`. Every `next` prints
 
 ```sh
 revup --project <dir> init                   # creates revup.config.json and revup.manifest.json
-revup --project <dir> status [d/m/p]
-revup --project <dir> next d/m/p             # runs/validates the current step and advances
+revup --project <dir> discover d/m <dir> [--write]  # proposes manifest entries for the files under <dir> (preview unless --write)
+revup --project <dir> status [d/m[/p]]
+revup --project <dir> next d/m[/p]           # runs/validates the current step and advances; a module only runs 01-scan for its programs
 revup --project <dir> prompt 02-extract d/m/p
 revup --project <dir> validate d/m/p
 ```
@@ -44,7 +45,11 @@ revup --project <dir> validate d/m/p
 `revup.config.json`: `{ "language": "php", "sourceRoot": "../erp", "outDir": "./revup-out", "includePaths": ["inc"], "encoding": "auto" }`
 `revup.manifest.json`: `{ "programs": [{ "id": "sales/orders/register", "entry": "orders/reg_order.php" }] }`
 
-In the agent: the `revup` skill (orchestrator) plus MCP tools `revup_status|next|prompt|validate`.
+To cover a whole module: `discover sales/orders orders --write` finds the entry points (files that no other
+file includes) under `<sourceRoot>/orders` and adds them to the manifest, `next sales/orders` scans them all, and
+the agent steps then go program by program.
+
+In the agent: the `revup` skill (orchestrator) plus MCP tools `revup_discover|status|next|prompt|validate`.
 
 ## Development
 

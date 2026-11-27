@@ -16,6 +16,8 @@ export interface ScanResult {
 
 export interface Scanner {
   language: string;
+  /** source file extensions (with dot), used to list candidate entry points */
+  extensions: string[];
   /** entry is relative to sourceRoot */
   scan(entry: string, ctx: ScanContext): Promise<ScanResult>;
 }

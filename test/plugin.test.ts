@@ -56,7 +56,7 @@ const text = (r: any) => (r.content as { text: string }[])[0]!.text;
 async function exercise(client: Client) {
   const dir = await project();
   const tools = (await client.listTools()).tools.map((t) => t.name).sort();
-  expect(tools).toEqual(["revup_next", "revup_prompt", "revup_status", "revup_validate"]);
+  expect(tools).toEqual(["revup_discover", "revup_next", "revup_prompt", "revup_status", "revup_validate"]);
 
   const status = await client.callTool({ name: "revup_status", arguments: { projectDir: dir } });
   expect(status.isError).toBe(false);
