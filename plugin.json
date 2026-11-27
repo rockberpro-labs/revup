@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "revup",
+  "version": "0.1.0",
+  "description": "Escava código PHP legado e gera specs organizadas para reescrita.",
+  "license": "MIT",
+  "keywords": ["legacy", "php", "spec", "reverse-engineering"]
+}

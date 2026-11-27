@@ -1,0 +1,4 @@
+node_modules/
+revup-out/
+*.log
+.DS_Store
