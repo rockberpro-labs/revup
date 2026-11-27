@@ -7,6 +7,7 @@ import { RevupError } from "./errors.ts";
 
 const projectDir = z.string().describe("Revup project folder (where revup.config.json lives)");
 const target = z.string().describe("Target as domain/module/program");
+const selection = z.string().describe("Target as domain/module/program, or domain/module for every program in a module");
 
 async function respond(fn: () => Promise<CmdResult>) {
   try {
@@ -38,14 +39,14 @@ export function createServer(): McpServer {
   );
   server.registerTool(
     "revup_status",
-    { description: "Lists targets and their current step (STALE if the PHP changed since the scan).", inputSchema: { projectDir, target: target.optional() } },
+    { description: "Lists targets and their current step (STALE if the PHP changed since the scan).", inputSchema: { projectDir, target: selection.optional() } },
     ({ projectDir, target }) => respond(() => cmdStatus(projectDir, target)),
   );
   server.registerTool(
     "revup_next",
     {
-      description: "Runs/validates the target's current step and advances. Prints '[step done] -> Next step: ...' or the exact errors.",
-      inputSchema: { projectDir, target },
+      description: "Runs/validates the target's current step and advances. Prints '[step done] -> Next step: ...' or the exact errors. With domain/module it only runs 01-scan for each program and lists the others.",
+      inputSchema: { projectDir, target: selection },
     },
     ({ projectDir, target }) => respond(() => cmdNext(projectDir, target)),
   );

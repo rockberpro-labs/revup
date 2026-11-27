@@ -3,10 +3,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { CONFIG_FILE, MANIFEST_FILE, loadProject, type Manifest } from "../config.ts";
 import { defaultHandlers, defaultValidators } from "./handlers.ts";
-import { advance, check, statusRows, type Handlers, type Outcome } from "./next.ts";
+import { advance, advanceScans, check, statusRows, type Handlers, type Outcome } from "./next.ts";
 import { buildPrompt, parseStep } from "./prompt.ts";
 import { discover, renderDiscovery } from "./discover.ts";
-import { resolveTarget } from "./target.ts";
+import { resolveSelection, resolveTarget } from "./target.ts";
 
 /** Textual result shared by the CLI and MCP. */
 export interface CmdResult {
@@ -40,8 +40,8 @@ export async function cmdInit(projectDir: string): Promise<CmdResult> {
 export async function cmdStatus(projectDir: string, id?: string): Promise<CmdResult> {
   const project = await loadProject(projectDir);
   const resolveId = (x: string) => resolveTarget(project, x);
-  if (id) resolveId(id); // valida
-  const rows = (await statusRows(project, resolveId)).filter((r) => !id || r.id === id);
+  const selected = id ? new Set(resolveSelection(project, id).map((t) => t.id)) : undefined;
+  const rows = (await statusRows(project, resolveId)).filter((r) => !selected || selected.has(r.id));
   if (!rows.length) return { ok: true, text: "no programs in the manifest" };
   const text = rows
     .map((r) => `${r.id.padEnd(40)} ${r.step}${r.stale.length ? `  STALE (${r.stale.join(", ")})` : ""}`)
@@ -51,7 +51,9 @@ export async function cmdStatus(projectDir: string, id?: string): Promise<CmdRes
 
 export async function cmdNext(projectDir: string, id: string, handlers: Handlers = defaultHandlers): Promise<CmdResult> {
   const project = await loadProject(projectDir);
-  return render(await advance(resolveTarget(project, id), handlers));
+  const targets = resolveSelection(project, id);
+  if (targets.length === 1 && targets[0]!.id === id) return render(await advance(targets[0]!, handlers));
+  return advanceScans(targets, handlers);
 }
 
 export async function cmdValidate(projectDir: string, id: string, handlers: Handlers = defaultHandlers): Promise<CmdResult> {

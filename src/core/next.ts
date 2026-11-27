@@ -30,7 +30,7 @@ export interface Outcome {
   state: State;
 }
 
-async function currentState(t: Target): Promise<{ state: State; stale: string[] }> {
+export async function currentState(t: Target): Promise<{ state: State; stale: string[] }> {
   const state = await loadState(t.dir);
   const stale = state.completed.length ? await staleFiles(t.project.sourceRoot, state.sourceHashes) : [];
   return { state, stale };
@@ -100,4 +100,26 @@ export async function statusRows(project: Project, resolve: (id: string) => Targ
     rows.push({ id: p.id, step: state.step, stale });
   }
   return rows;
+}
+
+/**
+ * Module-level `next`: runs the automatic step (01-scan, or a rescan when STALE) for each target.
+ * Targets waiting on an agent-written step are listed, not advanced.
+ */
+export async function advanceScans(targets: Target[], handlers: Handlers): Promise<{ ok: boolean; text: string }> {
+  const lines: string[] = [];
+  let ok = true;
+  for (const t of targets) {
+    const { state, stale } = await currentState(t);
+    if (state.step === "01-scan" || stale.length) {
+      const o = await advance(t, handlers);
+      if (!o.advanced) ok = false;
+      lines.push(`${t.id.padEnd(40)} ${o.message.replaceAll("\n", " ")}`, ...o.errors.map((e) => `  - ${e}`));
+    } else if (state.step === "DONE") {
+      lines.push(`${t.id.padEnd(40)} [DONE]`);
+    } else {
+      lines.push(`${t.id.padEnd(40)} [${state.step}] agent step: run \`next ${t.id}\` after writing its artifacts`);
+    }
+  }
+  return { ok, text: lines.join("\n") };
 }

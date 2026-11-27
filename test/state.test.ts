@@ -117,3 +117,62 @@ describe("targets and commands", () => {
     await expect(loadProject(dir)).rejects.toThrow("domain/module/program");
   });
 });
+
+describe("module selection", () => {
+  async function moduleProject() {
+    const { dir } = await makeProject({ "a.php": "<?php echo 1;", "b.php": "<?php echo 2;", "c.php": "<?php echo 3;" });
+    await writeFile(
+      join(dir, "revup.manifest.json"),
+      JSON.stringify({
+        programs: [
+          { id: "vendas/pedidos/cad", entry: "a.php" },
+          { id: "vendas/pedidos/lista", entry: "b.php" },
+          { id: "vendas/clientes/cad", entry: "c.php" },
+        ],
+      }),
+    );
+    return dir;
+  }
+
+  test("status filters by module", async () => {
+    const dir = await moduleProject();
+    const lines = (await cmdStatus(dir, "vendas/pedidos")).text.split("\n");
+    expect(lines.map((l) => l.split(/\s+/)[0])).toEqual(["vendas/pedidos/cad", "vendas/pedidos/lista"]);
+    expect((await cmdStatus(dir, "vendas")).text.split("\n")).toHaveLength(3);
+    expect((await cmdStatus(dir, "vendas/clientes/cad")).text).toContain("vendas/clientes/cad");
+  });
+
+  test("next on a module scans every program, then lists agent steps", async () => {
+    const dir = await moduleProject();
+    const first = await cmdNext(dir, "vendas/pedidos");
+    expect(first.ok).toBe(true);
+    expect(first.text).toBe(
+      [
+        `${"vendas/pedidos/cad".padEnd(40)} [01-scan done] -> Next step: 02-extract`,
+        `${"vendas/pedidos/lista".padEnd(40)} [01-scan done] -> Next step: 02-extract`,
+      ].join("\n"),
+    );
+    const second = await cmdNext(dir, "vendas/pedidos");
+    expect(second.ok).toBe(true);
+    expect(second.text).toContain("[02-extract] agent step: run `next vendas/pedidos/cad` after writing its artifacts");
+    expect((await cmdStatus(dir, "vendas/clientes")).text).toContain("01-scan");
+  });
+
+  test("a failed scan makes the module result not ok", async () => {
+    const dir = await moduleProject();
+    await writeFile(
+      join(dir, "revup.manifest.json"),
+      JSON.stringify({ programs: [{ id: "x/y/ok", entry: "a.php" }, { id: "x/y/bad", entry: "nope.php" }] }),
+    );
+    const r = await cmdNext(dir, "x/y");
+    expect(r.ok).toBe(false);
+    expect(r.text).toContain("[01-scan] failed");
+    expect(r.text).toContain("entry not found: nope.php");
+  });
+
+  test("unknown or malformed selection", async () => {
+    const dir = await moduleProject();
+    await expect(cmdNext(dir, "vendas/nada")).rejects.toThrow('no programs under "vendas/nada" in revup.manifest.json');
+    await expect(cmdStatus(dir, "a/b/c/d")).rejects.toThrow("invalid target");
+  });
+});

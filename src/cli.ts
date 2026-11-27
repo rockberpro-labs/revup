@@ -6,8 +6,8 @@ const USAGE = `usage: revup [--project <dir>] <command>
 
   init                     create sample revup.config.json and revup.manifest.json
   discover <domain/module> <dir> [--write]  propose manifest entries for the files under <dir> (relative to sourceRoot)
-  status [domain/module/program]
-  next <domain/module/program>      run/validate the current step and advance
+  status [domain/module[/program]]
+  next <domain/module[/program]>    run/validate the current step and advance (a module only runs 01-scan for its programs)
   validate <domain/module/program>  validate the current step without advancing
   prompt <step> <domain/module/program>  instructions for step 02-extract|03-spec|04-audit`;
 
@@ -35,7 +35,7 @@ export async function run(argv: string[]): Promise<CmdResult> {
     case "status":
       return cmdStatus(project, arg);
     case "next":
-      if (!arg) throw new RevupError("next requires <domain/module/program>");
+      if (!arg) throw new RevupError("next requires <domain/module[/program]>");
       return cmdNext(project, arg);
     case "validate":
       if (!arg) throw new RevupError("validate requires <domain/module/program>");
